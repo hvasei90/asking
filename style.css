@@ -29,3 +29,7 @@ button{font-family:inherit;border:0;cursor:pointer;transition:.2s}.primary{displ
 .card.chosen{border-color:rgba(32,184,166,.45);background:rgba(32,184,166,.06)}
 .choose-btn{align-self:flex-start;background:rgba(118,87,232,.15);color:#d9d2ff;border:1px solid rgba(118,87,232,.35);padding:10px 14px;border-radius:11px;font-weight:700}
 .choose-btn:disabled{color:#8ce5d9;border-color:rgba(32,184,166,.35);background:rgba(32,184,166,.08);cursor:default}
+
+.empty-message{grid-column:1/-1;text-align:center;padding:40px 20px;border:1px dashed rgba(255,255,255,.15);border-radius:18px;color:#ddd}
+.empty-message strong{font-size:20px}.empty-message p{color:#aaaac1}
+.remaining-note{grid-column:1/-1;padding:10px 14px;border-radius:12px;background:rgba(255,193,7,.08);border:1px solid rgba(255,193,7,.18);color:#ead58a;font-size:13px}
