@@ -70,6 +70,7 @@ const answeredCount = document.getElementById("answeredCount");
 let rotation = 0;
 let spinning = false;
 let selectedIndex = null;
+let selectedQuestionNumbers = new Set();
 
 function drawWheel(rot=rotation) {
   const cx = wheel.width/2, cy = wheel.height/2, r = 238;
@@ -162,50 +163,64 @@ function shuffle(arr){
 function buildQuiz(){
   studentNumber.textContent=faDigits(selectedIndex+1);
   studentName.textContent=students[selectedIndex];
+
   const selected=shuffle(questionPool).slice(0,10);
   cards.innerHTML="";
   answeredCount.textContent="۰";
-  let answered=0;
 
   selected.forEach((item,idx)=>{
+    const n=idx+1;
+    const alreadySelected=selectedQuestionNumbers.has(n);
+
     const card=document.createElement("article");
-    card.className="card question-card";
+    card.className="card" + (alreadySelected ? " chosen" : "");
     card.innerHTML=`
-      <div class="card-top"><span class="qnum">سؤال ${faDigits(idx+1)}</span><span class="tag">برای انتخاب کلیک کن</span></div>
-      <div class="question-hidden">${faDigits(idx+1)}</div>
-      <h3 class="question-text">${item.q}</h3>
-      <button class="answer-btn" disabled>نمایش پاسخ</button>
-      <div class="answer"><div class="answer-title">پاسخ</div><p>${item.a}</p></div>`;
+      <div class="card-top">
+        <span class="qnum">سؤال ${faDigits(n)}</span>
+        <span class="tag">${alreadySelected ? "انتخاب شده ✓" : "آماده انتخاب"}</span>
+      </div>
+      <div class="question-area">
+        <div class="question-placeholder">${alreadySelected ? "این سؤال قبلاً انتخاب شده است." : "برای انتخاب این کارت کلیک کنید"}</div>
+        <h3 class="question-text ${alreadySelected ? "visible" : ""}">${item.q}</h3>
+      </div>
+      <button class="choose-btn" ${alreadySelected ? "disabled" : ""}>
+        ${alreadySelected ? "انتخاب شده ✓" : "انتخاب سؤال"}
+      </button>
+      <div class="answer ${alreadySelected ? "show" : ""}">
+        <div class="answer-title">پاسخ</div>
+        <p>${alreadySelected ? item.a : ""}</p>
+      </div>`;
 
-    const btn=card.querySelector(".answer-btn");
-    const ans=card.querySelector(".answer");
+    const chooseBtn=card.querySelector(".choose-btn");
+    const qText=card.querySelector(".question-text");
+    const placeholder=card.querySelector(".question-placeholder");
+    const answer=card.querySelector(".answer");
     const tag=card.querySelector(".tag");
-    const qHidden=card.querySelector(".question-hidden");
 
-    card.addEventListener("click",()=>{
-      if(card.classList.contains("used")) return;
-      card.classList.add("used");
-      qHidden.classList.add("hide");
-      card.classList.add("revealed");
-      tag.textContent="این سؤال انتخاب شد ✓";
-      tag.classList.add("used-tag");
-      btn.disabled=false;
-      btn.textContent="نمایش پاسخ";
-      answered++;
-      answeredCount.textContent=faDigits(answered);
-    });
+    if(!alreadySelected){
+      card.addEventListener("click", (e)=>{
+        if(e.target.closest("button")) return;
+        selectedQuestionNumbers.add(n);
+        card.classList.add("chosen");
+        qText.classList.add("visible");
+        placeholder.textContent="سؤال انتخاب شد";
+        chooseBtn.textContent="انتخاب شده ✓";
+        chooseBtn.disabled=true;
+        tag.textContent="انتخاب شده ✓";
+        answer.classList.add("show");
+        answer.querySelector("p").textContent=item.a;
+        answeredCount.textContent=faDigits(selectedQuestionNumbers.size);
+      });
 
-    btn.addEventListener("click",(e)=>{
-      e.stopPropagation();
-      if(!card.classList.contains("used")) return;
-      if(!ans.classList.contains("show")){
-        ans.classList.add("show");
-        btn.textContent="پاسخ نمایش داده شد ✓";
-        btn.classList.add("done");
-      }
-    });
+      chooseBtn.addEventListener("click", ()=>{
+        card.click();
+      });
+    }
+
     cards.appendChild(card);
   });
+
+  answeredCount.textContent=faDigits(selectedQuestionNumbers.size);
 }
 document.getElementById("newStudentBtn").addEventListener("click",()=>{
   quizSection.classList.add("hidden");
